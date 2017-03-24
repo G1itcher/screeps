@@ -1,0 +1,14 @@
+{
+  "name": "Screeps",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "grunt-screeps": "^1.2.1"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^1.1.0"
+  }
+}
