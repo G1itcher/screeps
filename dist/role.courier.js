@@ -54,6 +54,18 @@ var roleCourier = {
 
                     target = target[Math.floor(Math.random()*target.length)];
                 }
+
+                //Fixers on orange flags
+                if(!target && creep.room.memory.hasRepairFlags){
+                    target = creep.room.find(FIND_MY_CREEPS, {
+                            filter: creep => creep.memory.currentRole === globals.creeps.builder.baseMemory.role &&
+                                             creep.memory.onRepairFlag &&
+                                             _.sum(creep.carry) < creep.carryCapacity
+                    });
+
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+
                 //Builders on red flags
                 if(!target && creep.room.memory.hasBuildFlags){
                     target = creep.room.find(FIND_MY_CREEPS, {
@@ -67,10 +79,18 @@ var roleCourier = {
 
                 //Builders
                 if(!target){
-                    target = creep.room.find(FIND_MY_CREEPS, {
-                            filter: creep => creep.memory.currentRole === globals.creeps.builder.baseMemory.role &&
-                                             _.sum(creep.carry) < creep.carryCapacity
-                    });
+                    if(Math.random() < 0.5){
+                        target = creep.room.find(FIND_MY_CREEPS, {
+                                filter: creep => creep.memory.currentRole === globals.creeps.builder.baseMemory.role &&
+                                                _.sum(creep.carry) < creep.carryCapacity
+                        });
+                    }
+                    else{
+                        target = creep.room.find(FIND_MY_CREEPS, {
+                                filter: creep => creep.memory.currentRole === globals.creeps.fixer.baseMemory.role && creep.memory.fixingSomething &&
+                                                _.sum(creep.carry) < creep.carryCapacity
+                        });
+                    }
 
                     target = target[Math.floor(Math.random()*target.length)];
                 }

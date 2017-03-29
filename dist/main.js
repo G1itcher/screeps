@@ -19,7 +19,8 @@ module.exports.loop = function () {
         }
         else{
             creep.memory.currentRole = "fixer";
-            roleFixer.run(creep);
+            var pointless = roleFixer.run(creep) || roleUpgrader.run(creep);
+            pointless = pointless;
         }
     }
 

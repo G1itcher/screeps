@@ -10,7 +10,7 @@
 module.exports = {
     creepCount: {
         MAX_BUILDERS: 2,
-        MAX_FIXERS: 2,
+        MAX_FIXERS: 0,
         MAX_HARVESTERS: 3,
         MAX_COURIERS: 4,
         MAX_UPGRADERS: 2,
@@ -22,6 +22,11 @@ module.exports = {
             max:2,
             body:[MOVE,WORK,WORK,WORK,WORK,WORK],
             baseMemory:{role:"builder"}
+        },
+        fixer:{
+            max:2,
+            body:[MOVE,WORK,WORK,WORK,WORK,WORK],
+            baseMemory:{role:"fixer"}
         },
         harvester:{
             max:2,

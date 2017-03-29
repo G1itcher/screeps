@@ -2,7 +2,6 @@ var roleBuilder = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-
         if(creep.carry.energy === 0) {
             creep.say('🔄 Need Energy!');
         }
@@ -18,8 +17,8 @@ var roleBuilder = {
             if(buildFlags.length){
                 for(var flag of buildFlags){
                     var consSite = creep.room.lookForAt(LOOK_CONSTRUCTION_SITES, flag.pos);
-                    if(consSite.length){
-                        ImportantBuildTargets.push(consSite[0]);
+                    if(consSite){
+                        ImportantBuildTargets.push(consSite);
                     }
                     else{
                         oldFlags.push(flag);
@@ -34,7 +33,7 @@ var roleBuilder = {
             
             var target = ImportantBuildTargets.length? ImportantBuildTargets : creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
             if(target) {
-                if(creep.build(target) === ERR_NOT_IN_RANGE) {
+                if(creep.build(target) === ERR_NOT_IN_RANGE || creep.carry.energy === 0) {
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }

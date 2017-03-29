@@ -18,8 +18,8 @@ var roleBuilder = {
             if(repairFlags.length){
                 for(var flag of repairFlags){
                     var consSite = creep.room.lookForAt(LOOK_STRUCTURES, flag.pos);
-                    if(consSite.length){
-                        ImportantRepairTargets.push(consSite[0]);
+                    if(consSite && consSite.hits < consSite.hitsMax){
+                        ImportantRepairTargets.push(consSite);
                     }
                     else{
                         oldFlags.push(flag);
@@ -32,11 +32,22 @@ var roleBuilder = {
             creep.memory.onRepairFlag = creep.room.memory.hasRepairFlags = ImportantRepairTargets.length > 0;
 
             
-            var target = ImportantRepairTargets.length? ImportantRepairTargets : creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+            var target = ImportantRepairTargets.length? ImportantRepairTargets : creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+                filter: c => c.hits < c.hitsMax
+            }) || creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: c => c.hits < c.hitsMax * 0.5 && c.structureType === STRUCTURE_ROAD
+            });
+            console.log(target);
             if(target) {
-                if(creep.repair(target) === ERR_NOT_IN_RANGE) {
+                if(creep.repair(target) === ERR_NOT_IN_RANGE || creep.carry.energy === 0) {
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
+                creep.memory.fixingSomething = true;
+                return true;
+            }
+            else{
+                creep.memory.fixingSomething = false;
+                return false;
             }
         }
         else {
@@ -44,6 +55,7 @@ var roleBuilder = {
             if(creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
             }
+            return true;
         }
     }
 };
