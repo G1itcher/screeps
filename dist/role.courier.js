@@ -5,71 +5,114 @@ var roleCourier = {
     /** @param {Creep} creep **/
     run: function(creep){
         if(creep.carry.energy < creep.carryCapacity) {
-            let target;
+            creep.memory.dropOffTarget = null;
+            let target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
+                filter: (creep) => creep.memory.role === globals.creeps.harvester.baseMemory.role && creep.memory.full
+            }) ||
 
-            if(!creep.memory.pickupTarget)
-            {
+            creep.pos.findClosestByRange(FIND_MY_CREEPS, {
+                filter: (creep) => creep.memory.role === globals.creeps.harvester.baseMemory.role
+            });
 
-                let harvesters = creep.room.find(FIND_MY_CREEPS, {
-                    filter: (creep) => creep.memory.role === globals.creeps.harvester.baseMemory.role && creep.memory.full
-                });
-
-                let newTarget = harvesters[0];
-                if(newTarget == null)
-                {
-                    return;
-                }
-                creep.memory.pickupTarget = newTarget.id;
-                target = newTarget;
+            if(target == null){
+                return;
             }
             else{
-                target = Game.getObjectById(creep.memory.pickupTarget);
-            }
-
-            
-
-            if(!target){
-                creep.memory.pickupTarget = null;
-            }
-            else if(creep.withdraw(target) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: '#ffaa00'}});
             }
         }
         else {
 
             var target;
-
+            creep.memory.pickupTarget = null;
             if(!creep.memory.dropOffTarget)
             {
+                //ORDER OF IMPORTANCE!
 
-                let highPriority = creep.room.find(FIND_MY_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType === STRUCTURE_EXTENSION ||
-                            structure.structureType === STRUCTURE_SPAWN ||
-                            structure.structureType === STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
-                    }
-                });
-                let creepWorkers = creep.room.find(FIND_MY_CREEPS, {
-                    filter: creep => creep.memory.role === globals.creeps.upgrader.baseMemory.role ||
-                                    creep.memory.role === globals.creeps.builder.baseMemory.role
-                });
+                //Spawner/extensions trying to spawn stuff
+                
+                //          \/-------------------
+                //Spawner/extensions trying to spawn stuff
+                //Fixers on Orange flags        |//TODO
+                //Builders on red flags         |
+                //Anything less than 50% energy |-- 10% of going to an upgrader anyway
+                //Builders / Fixers             |//TODO
+                //Anything not full             |
+                //          /\-------------------
+                //Upgraders                     
 
-                highPriority.push(..._.filter(creepWorkers, creep.memory.role === globals.creeps.builder.baseMemory.role));
-                let upgraders = _.filter(creepWorkers, creep.memory.role === globals.creeps.builder.upgrader.role);
+                let doAnUpgrade = Math.random() <= 0.1;
 
-                let controller = creep.room.find(FIND_MY_STRUCTURES, {
-                    filter: s => s.structureType === STRUCTURE_CONTROLLER
-                })[0];
+                //Spawner/extensions trying to spawn stuff
+                if(creep.room.memory.spawnerHasQue){
+                    target = creep.room.find(FIND_MY_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType === STRUCTURE_EXTENSION ||
+                                structure.structureType === STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+                        }
+                    });
 
-                let newTarget = controller && controller.ticksToDowngrade < globals.timings.minTicksToDowngrade?
-                                upgraders[0] :
-                                highPriority[Math.floor(Math.random()*highPriority.length)];
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+                //Builders on red flags
+                if(!target && creep.room.memory.hasBuildFlags){
+                    target = creep.room.find(FIND_MY_CREEPS, {
+                            filter: creep => creep.memory.currentRole === globals.creeps.builder.baseMemory.role &&
+                                             creep.memory.onBuildFlag &&
+                                             _.sum(creep.carry) < creep.carryCapacity
+                    });
 
-                creep.memory.dropOffTarget = newTarget.id;
-                target = newTarget;
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+
+                //Builders
+                if(!target){
+                    target = creep.room.find(FIND_MY_CREEPS, {
+                            filter: creep => creep.memory.currentRole === globals.creeps.builder.baseMemory.role &&
+                                             _.sum(creep.carry) < creep.carryCapacity
+                    });
+
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+
+                //Anything less than 50% energy
+                if(!target){
+                    target = creep.room.find(FIND_MY_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType === STRUCTURE_EXTENSION ||
+                                structure.structureType === STRUCTURE_SPAWN ||
+                                structure.structureType === STRUCTURE_TOWER) && structure.energy < structure.energyCapacity * 0.5;
+                        }
+                    });
+
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+                //Anything not full
+                if(!target){
+                    target = creep.room.find(FIND_MY_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType === STRUCTURE_EXTENSION ||
+                                structure.structureType === STRUCTURE_SPAWN ||
+                                structure.structureType === STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
+                        }
+                    });
+
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+
+                //Upgraders (10% of the time)
+                if(doAnUpgrade || !target){
+                    target = creep.room.find(FIND_MY_CREEPS, {
+                        filter: creep => creep.memory.currentRole === globals.creeps.upgrader.baseMemory.role && _.sum(creep.carry) < creep.carryCapacity
+                    });
+
+                    target = target[Math.floor(Math.random()*target.length)];
+                }
+
+                creep.memory.dropOffTarget = target.id;
             }
             else{
-                target = Game.getObjectById[creep.memory.dropOffTarget];
+                target = Game.getObjectById(creep.memory.dropOffTarget);
             }
 
             if(!target){
@@ -77,6 +120,9 @@ var roleCourier = {
             }
             else if(creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+            }
+            else{
+                creep.memory.dropOffTarget = null;
             }
         }
     }

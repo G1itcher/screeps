@@ -10,7 +10,9 @@
 module.exports = {
     creepCount: {
         MAX_BUILDERS: 2,
-        MAX_HARVESTERS: 2,
+        MAX_FIXERS: 2,
+        MAX_HARVESTERS: 3,
+        MAX_COURIERS: 4,
         MAX_UPGRADERS: 2,
         MAX_MINERS: 1,
         MAX_CLAIMERS: 1

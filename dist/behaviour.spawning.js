@@ -32,6 +32,9 @@ var spawnBehaviour = {
         
         var builders = _.filter(Game.creeps, (creep) => creep.memory.role === 'builder');
         console.log('Builders: ' + builders.length);
+
+        var fixers = _.filter(Game.creeps, (creep) => creep.memory.role === 'fixer');
+        console.log('Builders: ' + builders.length);
         
         var miners = _.filter(Game.creeps, (creep) => creep.memory.role === 'miner');
         console.log('Miners: ' + miners.length);
@@ -43,31 +46,38 @@ var spawnBehaviour = {
             console.log('Spawning new harvester: ' + newName);
         }
 
-        if(couriers.length < creepCounts.MAX_HARVESTERS) {
+        else if(couriers.length < creepCounts.MAX_COURIERS) {
             let newName = currentSpawn.createCreep([WORK,CARRY,MOVE], undefined, {role: 'courier'});
-            somethingToSpawn += creepCounts.MAX_HARVESTERS - couriers.length;
+            somethingToSpawn += creepCounts.MAX_COURIERS - couriers.length;
             console.log('Spawning new courier: ' + newName);
         }
         
-        if(upgraders.length < creepCounts.MAX_UPGRADERS) {
+        else if(upgraders.length < creepCounts.MAX_UPGRADERS) {
             let newName = currentSpawn.createCreep([WORK,CARRY,MOVE], undefined, {role: 'upgrader'});
             somethingToSpawn += creepCounts.MAX_UPGRADERS - upgraders.length;
             console.log('Spawning new upgrader: ' + newName);
         }
         
-        if(builders.length < creepCounts.MAX_BUILDERS) {
+        else if(builders.length < creepCounts.MAX_BUILDERS) {
             let newName = currentSpawn.createCreep([WORK,CARRY,MOVE], undefined, {role: 'builder'});
             somethingToSpawn += creepCounts.MAX_BUILDERS - builders.length;
             console.log('Spawning new builder: ' + newName);
         }
+
+        else if(builders.length < creepCounts.MAX_FIXERS) {
+            let newName = currentSpawn.createCreep([WORK,CARRY,MOVE], undefined, {role: 'fixer'});
+            somethingToSpawn += creepCounts.MAX_FIXERS - fixers.length;
+            console.log('Spawning new fixer: ' + newName);
+        }
         
-        if(miners.length < creepCounts.MAX_MINERS) {
+        else if(miners.length < creepCounts.MAX_MINERS) {
             let newName = currentSpawn.createCreep([WORK,CARRY,MOVE], undefined, {role: 'miner'});
             somethingToSpawn += creepCounts.MAX_MINERS - miners.length;
             console.log('Spawning new miner: ' + newName);
         }
 
-        
+        currentSpawn.room.memory.spawnerHasQue = somethingToSpawn > 0;
+        currentSpawn.room.memory.hasCouriers = couriers.length > 0;
     
         if(currentSpawn.spawning) {
             var spawningCreep = Game.creeps[currentSpawn.spawning.name];

@@ -14,13 +14,13 @@ var roleHarvester = {
         }
         else {
             creep.memory.full = true;
-            var targets = creep.room.find(FIND_MY_CREEPS, {
+            var target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
                 filter: (creep) => {
                     return creep.memory.role === globals.creeps.courier.baseMemory.role;
                 }
             });
-            if(targets.length > 0) {
-                creep.transfer(targets[0], RESOURCE_ENERGY);
+            if(target) {
+                creep.transfer(target, RESOURCE_ENERGY);
             }
             else{
                 alertManager.sendAlert(globals.alerts.NO_COURIERS);

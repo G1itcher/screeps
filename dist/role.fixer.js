@@ -8,18 +8,18 @@ var roleBuilder = {
         }
         if(!creep.memory.building) {
             creep.memory.building = true;
-            creep.say('🚧 build');
+            creep.say('🚧 repair');
         }
 
         if(creep.room.memory.hasCouriers) {
-            var buildFlags = creep.room.find(FIND_FLAGS, (flag) => flag.color === COLOR_RED);
-            var ImportantBuildTargets = [];
+            var repairFlags = creep.room.find(FIND_FLAGS, (flag) => flag.color === COLOR_ORANGE);
+            var ImportantRepairTargets = [];
             var oldFlags = [];
-            if(buildFlags.length){
-                for(var flag of buildFlags){
-                    var consSite = creep.room.lookForAt(LOOK_CONSTRUCTION_SITES, flag.pos);
+            if(repairFlags.length){
+                for(var flag of repairFlags){
+                    var consSite = creep.room.lookForAt(LOOK_STRUCTURES, flag.pos);
                     if(consSite.length){
-                        ImportantBuildTargets.push(consSite[0]);
+                        ImportantRepairTargets.push(consSite[0]);
                     }
                     else{
                         oldFlags.push(flag);
@@ -29,12 +29,12 @@ var roleBuilder = {
             
             oldFlags.forEach(flag => flag.remove());
 
-            creep.memory.onBuildFlag = creep.room.memory.hasBuildFlags = ImportantBuildTargets.length > 0;
+            creep.memory.onRepairFlag = creep.room.memory.hasRepairFlags = ImportantRepairTargets.length > 0;
 
             
-            var target = ImportantBuildTargets.length? ImportantBuildTargets : creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+            var target = ImportantRepairTargets.length? ImportantRepairTargets : creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
             if(target) {
-                if(creep.build(target) === ERR_NOT_IN_RANGE) {
+                if(creep.repair(target) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }

@@ -3,17 +3,18 @@ var roleUpgrader = {
     /** @param {Creep} creep **/
     run: function(creep) {
 
+        
         if(creep.memory.upgrading && creep.carry.energy === 0) {
-            creep.memory.upgrading = false;
-            creep.say('🔄 harvest');
+            creep.say('🔄 Need Energy');
         }
         if(!creep.memory.upgrading && creep.carry.energy === creep.carryCapacity) {
             creep.memory.upgrading = true;
             creep.say('⚡ upgrade');
         }
-
-        if(creep.memory.upgrading) {
-            if(creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
+        
+        if(creep.room.memory.hasCouriers) {
+            var err = creep.upgradeController(creep.room.controller);
+            if(err === ERR_NOT_IN_RANGE || err === ERR_NOT_ENOUGH_ENERGY) {
                 creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
